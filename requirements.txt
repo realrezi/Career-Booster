@@ -1,0 +1,5 @@
+streamlit==1.60.0
+openai==2.50.0
+fpdf2==2.8.7
+pypdf==6.14.2
+google-generativeai==0.8.6

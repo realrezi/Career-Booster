@@ -1,0 +1,32 @@
+# Secrets - never commit these
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Logs
+*.log
+
+# Generated / uploaded PDFs and parsed artifacts
+# (CVs contain personal data - keep them out of the repo)
+*.pdf
+parsed_result.json
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Personal one-off CV build script (contains own contact details)
+ahmadreza.py
