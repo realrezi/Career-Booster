@@ -1,0 +1,10 @@
+[theme]
+primaryColor = "#003366"
+base = "light"
+
+[server]
+# CVs are small; cap uploads to keep memory use predictable on free hosting tiers.
+maxUploadSize = 5
+
+[browser]
+gatherUsageStats = false

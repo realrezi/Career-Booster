@@ -1,8 +1,17 @@
-# 📄 Academic CV Tailor
+# 📄 Career Booster — Academic CV Tailor
 
-An open-access, AI-powered Streamlit web application designed to tailor academic CVs for PhD, postdoc, and research assistant positions. 
+[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![Streamlit](https://img.shields.io/badge/built%20with-Streamlit-FF4B4B.svg)](https://streamlit.io)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-This app extracts text from an uploaded CV, organizes it into a structured JSON representation (the "Ground Truth"), allows the user to review and correct the parsed data, and then tailors it to match a pasted academic job advertisement using direct Google Gemini (Gemini 2.0 Flash) or fallback OpenRouter models.
+> Tailor your academic CV to any PhD, postdoc, or research vacancy — without inventing a single credential.
+
+An open-access, AI-powered Streamlit web application designed to tailor academic CVs for PhD, postdoc, and research assistant positions.
+
+This app extracts text from an uploaded CV, organizes it into a structured JSON representation (the "Ground Truth"), lets you review and correct the parsed data, then tailors it to match a pasted academic job advertisement using Google Gemini 2.0 Flash directly or fallback OpenRouter models.
+
+**Why the Ground Truth step matters:** most AI CV tools happily invent a publication or a skill to match a job ad, which is career-ending in academia. Here the structured JSON is the hard boundary. The model may filter, reorder, and rephrase what is in it, but it cannot add to it, and you get to inspect and correct that JSON before anything is generated.
+
 
 ## 🚀 Key Features
 
@@ -18,16 +27,20 @@ This app extracts text from an uploaded CV, organizes it into a structured JSON 
 
 ## 🛠️ Installation & Local Running
 
+Requires Python 3.9 or newer.
+
 1. **Clone the repository:**
    ```bash
-   git clone <your-repository-url>
-   cd <repository-folder>
+   git clone https://github.com/realrezi/Career-Booster.git
+   cd Career-Booster
    ```
 
-2. **Install dependencies:**
+2. **Install dependencies** (a virtual environment is recommended):
    ```bash
+   python3 -m venv .venv && source .venv/bin/activate
    pip install -r requirements.txt
    ```
+
 
 3. **Launch the application:**
    ```bash
@@ -77,7 +90,30 @@ Deploying this app is completely free and takes just a few steps:
 * `app.py`: Streamlit frontend interface, sidebar key entry, and model selection.
 * `tailor_service.py`: Text extraction (`pypdf`), CV parsing, anti-hallucination tailoring prompt, Gemini/OpenRouter clients with retry and offline fallback.
 * `pdf_generator.py`: Generates the print-ready A4 PDF CV programmatically from structured JSON.
+* `cv_data.json`: Anonymized sample profile, used only as a fallback when no CV has been uploaded.
 * `requirements.txt`: Pinned Python package requirements.
+* `.streamlit/config.toml`: Theme, 5 MB upload cap, telemetry disabled.
 * `.env.example`: Template for optional local key storage. Copy to `.env` (git-ignored).
 * `run.sh`: Loads `.env` if present, then launches Streamlit.
+* `LICENSE`: MIT.
+
+---
+
+## ⚠️ Known limitations
+
+* **Text-based PDFs only.** Extraction uses `pypdf`, so a scanned or image-only CV yields no text. There is no OCR step.
+* **Parsing is best-effort.** Unusual CV layouts (multi-column, heavy tables) can confuse both the LLM and the offline parser. This is exactly why Step 2 lets you correct the JSON by hand.
+* **The offline engine is a safety net, not a peer.** Regex heuristics keep the app functional without a key, but the output is noticeably weaker than an LLM pass.
+* **Free-tier models are rate-limited.** OpenRouter free models return 429s under load. The app retries and falls back, but a Gemini key is the smoother path.
+* **PDF output is capped at two pages** by design, matching typical academic application limits.
+
+---
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome. Two ground rules:
+
+1. Never commit an API key, a real CV, or any generated PDF. `.gitignore` covers the usual cases, so check `git status` before committing.
+2. Changes to the tailoring prompt in `tailor_service.py` must preserve the anti-hallucination constraint. The model filters and rephrases the Ground Truth; it never adds to it.
+
 
