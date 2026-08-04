@@ -1,0 +1,41 @@
+# Secrets - never commit these
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Temporary / Scratch scripts
+add_*.py
+fix_*.py
+update_*.py
+test_*.py
+ahmadreza*
+*.textClipping
+
+# Logs
+*.log
+
+# Generated / uploaded PDFs and parsed artifacts
+*.pdf
+parsed_result.json
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Node.js / React build artifacts
+node_modules/
+frontend/node_modules/
+frontend/dist/
