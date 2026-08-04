@@ -25,6 +25,7 @@ export default function App() {
   
   const [jobAdText, setJobAdText] = useState('');
   const [fitData, setFitData] = useState(null);
+  const [loadingFit, setLoadingFit] = useState(false);
   const [tailoredCv, setTailoredCv] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
 
@@ -220,9 +221,14 @@ export default function App() {
     }
   };
 
-  // Step 3: Analyze Fit Score when Job Ad changes
+  // Step 3: Analyze Fit Score
   const handleAnalyzeFit = async () => {
     if (!jobAdText.trim() || !parsedCv) return;
+    if (!geminiKey.trim()) {
+      setError('A Google Gemini API Key is required to calculate match score. Please enter your key above.');
+      return;
+    }
+    setLoadingFit(true);
     try {
       const res = await fetch(`${API_BASE}/analyze-fit`, {
         method: 'POST',
@@ -230,14 +236,20 @@ export default function App() {
         body: JSON.stringify({
           cv_data: parsedCv,
           job_description: jobAdText,
+          gemini_key: geminiKey.trim(),
         }),
       });
       if (res.ok) {
         const data = await res.json();
         setFitData(data);
+      } else {
+        const errTxt = await res.text();
+        console.error('Fit score error:', errTxt);
       }
     } catch (err) {
       console.error('Match score analysis error:', err);
+    } finally {
+      setLoadingFit(false);
     }
   };
 
@@ -261,6 +273,9 @@ export default function App() {
     setStatusMsg('Tailoring CV content to match job requirements...');
 
     try {
+      if (!fitData) {
+        handleAnalyzeFit();
+      }
       const tailorRes = await fetch(`${API_BASE}/tailor-cv`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -604,8 +619,25 @@ export default function App() {
                 rows={10}
                 placeholder="Paste the job advertisement text here..."
                 value={jobAdText}
-                onChange={(e) => setJobAdText(e.target.value)}
+                onChange={(e) => {
+                  setJobAdText(e.target.value);
+                  if (fitData) setFitData(null);
+                }}
               />
+
+              <div style={{ marginTop: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <button 
+                  className="btn-secondary" 
+                  onClick={handleAnalyzeFit} 
+                  disabled={!jobAdText.trim() || loadingFit}
+                  style={{ padding: '0.6rem 1.2rem', fontSize: '0.88rem', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  <Cpu size={16} style={{ color: '#4f46e5' }} /> {loadingFit ? 'Calculating Semantic Fit...' : '⚡ Calculate Match Score & Gap Analysis'}
+                </button>
+                <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                  {fitData ? '✅ Match score calculated' : 'Click above to evaluate alignment'}
+                </span>
+              </div>
 
               {/* Match Score Dashboard */}
               {fitData && (
@@ -653,9 +685,14 @@ export default function App() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <div>
                   <h2 style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>🎉 Step 4: Tailored CV & Cover Letter Studio</h2>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
                     Download your tailored CV in PDF or MS Word (.docx), or generate a custom Cover/Motivation Letter below.
                   </p>
+                  {fitData && (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#eef2ff', color: '#4f46e5', padding: '0.35rem 0.8rem', borderRadius: '16px', fontSize: '0.84rem', fontWeight: 700 }}>
+                      <Target size={16} /> ATS Match Score: {fitData.fit_percentage}% Alignment
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
                   <button className="btn-secondary" onClick={() => handleDownloadDOCX(selectedTheme)} style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', borderColor: 'rgba(96, 165, 250, 0.3)', cursor: 'pointer' }}>

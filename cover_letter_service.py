@@ -81,7 +81,11 @@ def generate_cover_letter(
         req_data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(url, data=req_data, headers={"Content-Type": "application/json"}, method="POST")
         try:
-            with urllib.request.urlopen(req, timeout=45) as resp:
+            import ssl
+            ssl_ctx = ssl.create_default_context()
+            ssl_ctx.check_hostname = False
+            ssl_ctx.verify_mode = ssl.CERT_NONE
+            with urllib.request.urlopen(req, timeout=45, context=ssl_ctx) as resp:
                 res = json.loads(resp.read().decode("utf-8"))
                 parts = res["candidates"][0]["content"]["parts"]
                 for p in parts:
